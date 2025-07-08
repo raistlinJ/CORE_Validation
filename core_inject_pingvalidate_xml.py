@@ -81,7 +81,7 @@ def add_service_to_userdefined(xml_file, nodeip_map, output_file):
                 #create the file that has pings to all other nodes
                 for ipv4 in nodeip_map[mapping]:
                     logging.debug(f"Adding ping command for {mapping} with IPv4 {ipv4}")
-                    filetext += f"ping {ipv4} -c 60 | grep ' bytes from ' | wc -l >> /tmp/{device_id}_to_{mapping}___{ipv4}.txt &"
+                    filetext += f"ping {ipv4} -c 60 | grep ' bytes from ' | wc -l > /tmp/{device_id}_to_{mapping}___{ipv4}.txt &"
                     filetext += "\n"
             file.attrib['name'] = f"pings_{device_id}.sh"
             file.text = ET.CDATA(filetext)

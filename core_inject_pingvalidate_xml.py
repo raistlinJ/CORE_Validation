@@ -30,7 +30,7 @@ def add_service_to_userdefined(xml_file, nodeip_map, output_file):
         logging.debug(f"Processing device with id: {device_id}")
         #find the services tag, and if it doesn't exist, add it
         logging.debug(f"Checking for <services> tag for device id: {device_id}")
-        services = device.findall(".//services")
+        services = device.find(".//services")
         if services == None or services == []:
             logging.debug(f"No <services> tag found for device id {device_id}. Adding it.")
             services = ET.SubElement(device, "services")

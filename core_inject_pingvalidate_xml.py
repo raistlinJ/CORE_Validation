@@ -14,11 +14,11 @@ def add_service_to_userdefined(xml_file, nodeip_map, output_file):
     # Parse the XML
     parser = ET.XMLParser(strip_cdata=False)
     tree = ET.parse(xml_file, parser=parser)
-    root = tree.getroot()
+    scenario = tree.getroot()
 
     # Find all <device> tags
     logging.debug("Finding all <device> tags in the XML.")
-    devices = root.findall(".//device")
+    devices = scenario.findall(".//device")
 
     for device in devices:
         logging.debug("Processing device: %s", device)
@@ -28,32 +28,42 @@ def add_service_to_userdefined(xml_file, nodeip_map, output_file):
             continue
 
         logging.debug(f"Processing device with id: {device_id}")
+        #find the services tag, and if it doesn't exist, add it
+        logging.debug(f"Checking for <services> tag for device id: {device_id}")
+        services = device.findall(".//services")
+        if services == None or services == []:
+            logging.debug(f"No <services> tag found for device id {device_id}. Adding it.")
+            services = ET.SubElement(device, "services")
+
         #get the service and check if the UserDefined tag exists
-        services = device.findall(".//service")
-        if services != None:
+        services_service = services.findall(".//service")
+        #if no service tag exists, then add one for the UserDefined service
+        if services_service == None or services_service == []:
+            logging.debug(f"No <service> tag found for device id {device_id}. Adding it.")
+            services_service = ET.SubElement(services, "service", name="UserDefined")
+        else:
+            #get all services and check if any are UserDefined, if not, then add one
             contains_userdefined = False
             logging.debug(f"Checking for <UserDefined> tag in services for device id: {device_id}")
-            for service in services:
+            for service in services_service:
                 if 'name' in service.attrib and service.attrib['name'] == "UserDefined":
                     contains_userdefined = True
                     break
             if contains_userdefined == False:
                 logging.debug(f"No <UserDefined> tag found for device id {device_id}. Adding it.")
-                services.append(ET.Element("UserDefined", id=device_id))
+                services.append(ET.Element("service",name="UserDefined"))
 
         # Find <UserDefined> tag with matching id
         logging.debug(f"Finding <service_configurations> for device id: {device_id}")
-        service_configurations = root.find(f".//service_configurations")
-        if service_configurations is None:
-            logging.debug(f"Not Found, looking instead for <configservice_configurations> for device id: {device_id}")
-            #different versions of xml use different tag name
-            service_configurations = root.find(f".//configservice_configurations")
-
-        if service_configurations is None:
-            logging.debug("No <service_configuration> found in the XML. Skipping device.")
-            continue
+        service_configurations = scenario.find(f".//service_configurations")
+        if service_configurations is None or service_configurations == []:
+            logging.debug("No <service_configurations> found in the XML. Adding it.")
+            service_configurations = ET.SubElement(scenario, "service_configurations")
+        if service_configurations is None or service_configurations == []:
+            logging.error("Could not create service_configuration. Quitting.")
+            exit -1
         userdefined = service_configurations.find(f".//service[@name='UserDefined'][@node='{device_id}']")
-        if userdefined is None:
+        if userdefined == None or userdefined == []:
             logging.debug(f"No <UserDefined> found for device id {device_id}. Adding it.")
             userdefined = ET.SubElement(service_configurations, "service", name="UserDefined", node=device_id)
         else:
@@ -61,7 +71,7 @@ def add_service_to_userdefined(xml_file, nodeip_map, output_file):
 
         # Create a new <startup> tag
         startups = userdefined.find(f".//startups")
-        if startups is None:
+        if startups == None or startups == []:
             logging.debug(f"No <startups> found in <UserDefined> for device id {device_id}. Creating it.")
             startups = ET.SubElement(userdefined, "startups")
         else:
@@ -75,7 +85,7 @@ def add_service_to_userdefined(xml_file, nodeip_map, output_file):
         # Create a new <file> tag
         logging.debug(f"Creating <files> section for device id {device_id}")
         files = userdefined.find(f".//files")
-        if files is None:
+        if files == None or files == []:
             logging.debug(f"No <files> found in <UserDefined> for device id {device_id}. Creating it.")
             files = ET.SubElement(userdefined, "files")
         else:
@@ -105,11 +115,11 @@ def get_nodes_ipv4(xml_file):
     # Parse the XML
     parser = ET.XMLParser(strip_cdata=False)
     tree = ET.parse(xml_file, parser=parser)
-    root = tree.getroot()
+    scenario = tree.getroot()
     nodeip_map = {}
     # Find all <device> tags
     logging.debug("Finding all <links> tags in the XML.")
-    links = root.findall(".//links/link")
+    links = scenario.findall(".//links/link")
 
     for link in links:
         logging.debug(f"Processing link: {link}")
@@ -139,7 +149,7 @@ def get_nodes_ipv4(xml_file):
 if __name__ == "__main__":
     logger = logging.getLogger()
     logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
-    input_xml = "scenario_with_static.xml"    # Path to input XML file
-    output_xml = "scenario_with_static_mod.xml"  # Path to output XML file
+    input_xml = "input.xml"    # Path to input XML file
+    output_xml = "output.xml"  # Path to output XML file
     nodeip_map = get_nodes_ipv4(input_xml)
     add_service_to_userdefined(input_xml, nodeip_map, output_xml)

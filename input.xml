@@ -14,19 +14,19 @@
         <service name="IPForward"/>
         <service name="OSPFv3"/>
       </configservices>
-    <services><service name="UserDefined"/></services></device>
+    </device>
     <device id="3" name="n3" icon="" canvas="0" type="PC" class="" image="">
       <position x="100" y="200" lat="47.578111215688836" lon="-122.1311808630113" alt="2.0"/>
       <configservices>
         <service name="DefaultRoute"/>
       </configservices>
-    <services><service name="UserDefined"/></services></device>
+    </device>
     <device id="4" name="n4" icon="" canvas="0" type="PC" class="" image="">
       <position x="400" y="500" lat="47.5775164447498" lon="-122.12800348850175" alt="2.0"/>
       <configservices>
         <service name="DefaultRoute"/>
       </configservices>
-    <services><service name="UserDefined"/></services></device>
+    </device>
   </devices>
   <links>
     <link node1="1" node2="2">
@@ -77,13 +77,4 @@
       <service name="DefaultRoute"/>
     </node>
   </default_services>
-<service_configurations><service name="UserDefined" node="2"><startups><startup>/bin/bash pings_2.sh</startup></startups><files><file name="pings_2.sh"><![CDATA[#!/bin/bash
-ping 10.0.0.2 -c 60 | grep ' bytes from ' | wc -l > /tmp/2_to_3___10.0.0.2.txt &
-ping 10.0.0.3 -c 60 | grep ' bytes from ' | wc -l > /tmp/2_to_4___10.0.0.3.txt &
-]]></file></files></service><service name="UserDefined" node="3"><startups><startup>/bin/bash pings_3.sh</startup></startups><files><file name="pings_3.sh"><![CDATA[#!/bin/bash
-ping 10.0.0.1 -c 60 | grep ' bytes from ' | wc -l > /tmp/3_to_2___10.0.0.1.txt &
-ping 10.0.0.3 -c 60 | grep ' bytes from ' | wc -l > /tmp/3_to_4___10.0.0.3.txt &
-]]></file></files></service><service name="UserDefined" node="4"><startups><startup>/bin/bash pings_4.sh</startup></startups><files><file name="pings_4.sh"><![CDATA[#!/bin/bash
-ping 10.0.0.1 -c 60 | grep ' bytes from ' | wc -l > /tmp/4_to_2___10.0.0.1.txt &
-ping 10.0.0.2 -c 60 | grep ' bytes from ' | wc -l > /tmp/4_to_3___10.0.0.2.txt &
-]]></file></files></service></service_configurations></scenario>
+</scenario>
